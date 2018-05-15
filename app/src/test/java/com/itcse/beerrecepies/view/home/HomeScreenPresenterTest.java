@@ -4,11 +4,12 @@ import com.itcse.beerrecepies.model.data.BeerDetails;
 import com.itcse.beerrecepies.model.repository.ApiInterface;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,8 +17,10 @@ import java.util.List;
 
 import retrofit2.mock.Calls;
 
-@RunWith(MockitoJUnitRunner.class)
 public class HomeScreenPresenterTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     private
