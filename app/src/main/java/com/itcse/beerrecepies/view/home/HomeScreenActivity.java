@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 import com.itcse.beerrecepies.R;
 import com.itcse.beerrecepies.model.data.BeerDetails;
+import com.itcse.beerrecepies.model.repository.ApiClient;
 
 import java.util.List;
 
@@ -49,6 +50,9 @@ public class HomeScreenActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
+
+        HomeScreenPresenter presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
+        presenter.getBeers();
     }
 
     @Override

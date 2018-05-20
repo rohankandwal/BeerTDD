@@ -7,40 +7,54 @@ import com.itcse.beerrecepies.model.repository.ApiInterface;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class HomeScreenPresenter implements HomeScreenContract.Presenter {
 
     private HomeScreenContract.View view;
     private ApiInterface apiInterface;
 
-    public HomeScreenPresenter(@NonNull final HomeScreenContract.View view,
-                               @NonNull final ApiInterface apiInterface) {
+    HomeScreenPresenter(@NonNull final HomeScreenContract.View view,
+                        @NonNull final ApiInterface apiInterface) {
         this.view = view;
         this.apiInterface = apiInterface;
     }
 
     @Override
     public void getBeers() {
-        apiInterface.getBeerList().enqueue(new Callback<List<BeerDetails>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<BeerDetails>> call, @NonNull Response<List<BeerDetails>> response) {
-                if (response.isSuccessful()) {
-                    final List<BeerDetails> beerDetailsList = response.body();
-                    if (beerDetailsList != null && beerDetailsList.size() > 0) {
-                        view.setBeerList(beerDetailsList);
-                    } else {
-                        view.noBeerFound();
+        apiInterface.getBeerList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<List<BeerDetails>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<List<BeerDetails>> call, @NonNull Throwable t) {
+                    @Override
+                    public void onNext(List<BeerDetails> beerDetails) {
+                        Timber.d("got data");
+                        if (beerDetails.size() > 0) {
+                            view.setBeerList(beerDetails);
+                        } else {
+                            view.noBeerFound();
+                        }
+                    }
 
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.d("Error e = %s", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Timber.d("onComplete");
+//                        view.noBeerFound();
+                    }
+                });
     }
 }

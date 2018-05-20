@@ -1,5 +1,6 @@
 package com.itcse.beerrecepies.view.home;
 
+import com.itcse.beerrecepies.RxSchedulersOverrideRule;
 import com.itcse.beerrecepies.model.data.BeerDetails;
 import com.itcse.beerrecepies.model.repository.ApiInterface;
 
@@ -12,16 +13,16 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import retrofit2.mock.Calls;
+import io.reactivex.Observable;
 
 public class HomeScreenPresenterTest {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-
+    @Rule
+    public RxSchedulersOverrideRule schedulersOverrideRule = new RxSchedulersOverrideRule();
     @Mock
     private
     HomeScreenContract.View view;
@@ -40,7 +41,7 @@ public class HomeScreenPresenterTest {
     public void getBeerList() {
         // Given
         final List<BeerDetails> beerDetailsList = Arrays.asList(new BeerDetails(), new BeerDetails());
-        Mockito.when(apiInterface.getBeerList()).thenReturn(Calls.response(beerDetailsList));
+        Mockito.when(apiInterface.getBeerList()).thenReturn(Observable.just(beerDetailsList));
         // When
         presenter.getBeers();
         // Then
@@ -50,7 +51,9 @@ public class HomeScreenPresenterTest {
     @Test
     public void noBeerFound() {
         // Given
-        Mockito.when(apiInterface.getBeerList()).thenReturn(Calls.response(Collections.<BeerDetails>emptyList()));
+        // Don't call Observable.<List<BeerDetails>>empty() even when returning emptyList because
+        // it emits nothing, so onNext() will never be called, directly onCompleted.
+        Mockito.when(apiInterface.getBeerList()).thenReturn(Observable.<List<BeerDetails>>empty());
         // When
         presenter.getBeers();
         // Then

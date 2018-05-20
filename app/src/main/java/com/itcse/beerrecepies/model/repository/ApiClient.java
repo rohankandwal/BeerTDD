@@ -1,6 +1,9 @@
 package com.itcse.beerrecepies.model.repository;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
@@ -16,10 +19,17 @@ public class ApiClient {
     public static ApiInterface getAPI() {
 
         if (retrofit == null) {
+            final HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addInterceptor(loggingInterceptor);
+
             retrofit = new Retrofit
                     .Builder()
                     .baseUrl(BASE_URL)
+                    .client(builder.build())
                     .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();
         }
 

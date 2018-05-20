@@ -1,9 +1,10 @@
 
 package com.itcse.beerrecepies.model.data;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class BeerDetails {
 
@@ -30,25 +31,25 @@ public class BeerDetails {
     public Double abv;
     @SerializedName("ibu")
     @Expose
-    public Integer ibu;
+    public Double ibu;
     @SerializedName("target_fg")
     @Expose
-    public Integer target_fg;
+    public Double target_fg;
     @SerializedName("target_og")
     @Expose
-    public Integer target_og;
+    public Double target_og;
     @SerializedName("ebc")
     @Expose
-    public Integer ebc;
+    public Double ebc;
     @SerializedName("srm")
     @Expose
-    public Integer srm;
+    public Double srm;
     @SerializedName("ph")
     @Expose
     public Double ph;
     @SerializedName("attenuation_level")
     @Expose
-    public Integer attenuation_level;
+    public Double attenuation_level;
     @SerializedName("volume")
     @Expose
     public Volume volume;
