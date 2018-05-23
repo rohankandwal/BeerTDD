@@ -10,6 +10,10 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface ApiInterface {
+
     @GET("beers")
     Observable<List<BeerDetails>> getBeerList(@Query("page") final int page);
+
+    @GET("beers")
+    Observable<List<BeerDetails>> getBeerByName(@Query("beer_name") final String beerName);
 }

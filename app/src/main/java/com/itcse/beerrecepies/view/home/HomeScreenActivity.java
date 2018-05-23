@@ -67,7 +67,6 @@ public class HomeScreenActivity extends AppCompatActivity
 
         presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
         presenter.getBeers(1);
-        progress.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -185,6 +184,16 @@ public class HomeScreenActivity extends AppCompatActivity
     @Override
     public void showToast(@NonNull final String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void noBeerWithNameFound(String beerName) {
+
+    }
+
+    @Override
+    public void searchedBeerListFound(List<BeerDetails> beerDetails) {
+
     }
 
     @Override

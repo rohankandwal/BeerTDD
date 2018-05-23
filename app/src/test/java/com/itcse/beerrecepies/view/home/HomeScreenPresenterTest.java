@@ -83,6 +83,26 @@ public class HomeScreenPresenterTest {
         Mockito.verify(view).setBeerList(beerDetailsList);
     }
 
+    @Test
+    public void searchedBeerByNameFound() {
+        // Given
+        Mockito.when(apiInterface.getBeerByName("B")).thenReturn(Observable.just(beerDetailsList));
+        // When
+        presenter.searchBeerByName("B");
+        // Then
+        Mockito.verify(view).searchedBeerListFound(beerDetailsList);
+    }
+
+    @Test
+    public void searchedBeerByNameNotFound() {
+        // Given
+        Mockito.when(apiInterface.getBeerByName("B")).thenReturn(Observable.<List<BeerDetails>>just(new ArrayList<BeerDetails>()));
+        // When
+        presenter.searchBeerByName("B");
+        // Then
+        Mockito.verify(view).noBeerWithNameFound("B");
+    }
+
 /*    @Test
     public void getBeerList() {
         // Given
