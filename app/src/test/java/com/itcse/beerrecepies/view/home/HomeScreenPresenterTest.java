@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class HomeScreenPresenterTest {
     ApiInterface apiInterface;
 
     private HomeScreenPresenter presenter;
+    private final List<BeerDetails> beerDetailsList = Arrays.asList(new BeerDetails(), new BeerDetails());
 
     @Before
     public void setUp() {
@@ -40,24 +42,45 @@ public class HomeScreenPresenterTest {
     @Test
     public void getBeerList() {
         // Given
-        final List<BeerDetails> beerDetailsList = Arrays.asList(new BeerDetails(), new BeerDetails());
-        Mockito.when(apiInterface.getBeerList()).thenReturn(Observable.just(beerDetailsList));
+        Mockito.when(apiInterface.getBeerList(0)).thenReturn(Observable.just(beerDetailsList));
         // When
-        presenter.getBeers();
+        presenter.getBeers(0);
         // Then
         Mockito.verify(view).setBeerList(beerDetailsList);
     }
 
     @Test
-    public void noBeerFound() {
+    public void emptyBeerList() {
         // Given
         // Don't call Observable.<List<BeerDetails>>empty() even when returning emptyList because
         // it emits nothing, so onNext() will never be called, directly onCompleted.
-        Mockito.when(apiInterface.getBeerList()).thenReturn(Observable.<List<BeerDetails>>empty());
+        Mockito.when(apiInterface.getBeerList(0)).thenReturn(Observable.<List<BeerDetails>>just(new ArrayList<BeerDetails>()));
         // When
-        presenter.getBeers();
+        presenter.getBeers(0);
         // Then
         Mockito.verify(view).noBeerFound();
+    }
+
+    @Test
+    public void noBeerData() {
+        // Given
+        // Don't call Observable.<List<BeerDetails>>empty() even when returning emptyList because
+        // it emits nothing, so onNext() will never be called, directly onCompleted.
+        Mockito.when(apiInterface.getBeerList(0)).thenReturn(Observable.<List<BeerDetails>>empty());
+        // When
+        presenter.getBeers(0);
+        // Then
+        Mockito.verify(view).showProgress(false);
+    }
+
+    @Test
+    public void loadMore() {
+        // Given
+        Mockito.when(apiInterface.getBeerList(1)).thenReturn(Observable.just(beerDetailsList));
+        // When
+        presenter.getBeers(1);
+        // Then
+        Mockito.verify(view).setBeerList(beerDetailsList);
     }
 
 /*    @Test

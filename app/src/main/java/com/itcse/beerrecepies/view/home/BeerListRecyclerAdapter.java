@@ -68,10 +68,19 @@ public class BeerListRecyclerAdapter extends RecyclerView.Adapter<BeerListRecycl
     }
 
     /**
-     * Function to update list of beers.
+     * Function to update list of beers coming from pagination
      * @param beerList contains new list of data.
      */
-    void updateList(@NonNull final List<BeerDetails> beerList) {
+    void addMore(@NonNull final List<BeerDetails> beerList) {
+        this.beerDetailsList.addAll(beerList);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Function to remove existing data and load new data
+     * @param beerList contains new list of data.
+     */
+    void refreshData(@NonNull final List<BeerDetails> beerList) {
         this.beerDetailsList.clear();
         this.beerDetailsList.addAll(beerList);
         notifyDataSetChanged();

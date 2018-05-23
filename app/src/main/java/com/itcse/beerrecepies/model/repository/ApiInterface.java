@@ -7,8 +7,9 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public interface ApiInterface {
     @GET("beers")
-    Observable<List<BeerDetails>> getBeerList();
+    Observable<List<BeerDetails>> getBeerList(@Query("page") final int page);
 }

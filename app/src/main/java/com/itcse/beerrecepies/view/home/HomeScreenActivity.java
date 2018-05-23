@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.itcse.beerrecepies.R;
 import com.itcse.beerrecepies.model.data.BeerDetails;
 import com.itcse.beerrecepies.model.repository.ApiClient;
+import com.itcse.beerrecepies.utils.EndlessScrollListener;
 import com.itcse.beerrecepies.utils.GridSpacesItemDecoration;
 
 import java.util.List;
@@ -65,7 +66,7 @@ public class HomeScreenActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
-        presenter.getBeers();
+        presenter.getBeers(1);
         progress.setVisibility(View.VISIBLE);
     }
 
@@ -159,12 +160,19 @@ public class HomeScreenActivity extends AppCompatActivity
     public void setBeerList(@NonNull final List<BeerDetails> beerList) {
         if (beerList.size() > 0) {
             if (rvBeerRecepies.getAdapter() == null) {
-                rvBeerRecepies.setLayoutManager(new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL));
+                final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL);
+                rvBeerRecepies.setLayoutManager(layoutManager);
                 rvBeerRecepies.addItemDecoration(new GridSpacesItemDecoration(2, getResources().getDimensionPixelSize(R.dimen.content_padding), true));
                 rvBeerRecepies.setAdapter(new BeerListRecyclerAdapter(beerList));
+                rvBeerRecepies.addOnScrollListener(new EndlessScrollListener(layoutManager) {
+                    @Override
+                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                        presenter.getBeers(page);
+                    }
+                });
             } else {
                 final BeerListRecyclerAdapter adapter = (BeerListRecyclerAdapter) rvBeerRecepies.getAdapter();
-                adapter.updateList(beerList);
+                adapter.addMore(beerList);
             }
         }
     }

@@ -19,6 +19,10 @@ class HomeScreenContract {
     }
 
     interface Presenter extends BasePresenter {
-        void getBeers();
+        /**
+         * Function to load beer list page by page
+         * @param page denotes page number to be loaded
+         */
+        void getBeers(final int page);
     }
 }

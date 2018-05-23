@@ -32,8 +32,8 @@ public class HomeScreenPresenter implements HomeScreenContract.Presenter {
     }
 
     @Override
-    public void getBeers() {
-        final Observable<List<BeerDetails>> beerList = apiInterface.getBeerList();
+    public void getBeers(final int page) {
+        final Observable<List<BeerDetails>> beerList = apiInterface.getBeerList(page);
         beerList.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .retryWhen(new Function<Observable<Throwable>, ObservableSource<?>>() {
@@ -59,10 +59,10 @@ public class HomeScreenPresenter implements HomeScreenContract.Presenter {
                     @Override
                     public void onNext(List<BeerDetails> beerDetails) {
                         Timber.d("got data");
-                        if (beerDetails.size() > 0) {
-                            view.setBeerList(beerDetails);
-                        } else {
+                        if (beerDetails == null || beerDetails.size() == 0) {
                             view.noBeerFound();
+                        } else {
+                            view.setBeerList(beerDetails);
                         }
                         view.showProgress(false);
                     }
