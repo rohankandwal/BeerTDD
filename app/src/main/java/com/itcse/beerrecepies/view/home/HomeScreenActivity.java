@@ -2,27 +2,34 @@ package com.itcse.beerrecepies.view.home;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.SearchView;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.itcse.beerrecepies.R;
 import com.itcse.beerrecepies.model.data.BeerDetails;
 import com.itcse.beerrecepies.model.repository.ApiClient;
+import com.itcse.beerrecepies.utils.GridSpacesItemDecoration;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.annotations.Nullable;
 import timber.log.Timber;
 
 public class HomeScreenActivity extends AppCompatActivity
@@ -36,6 +43,12 @@ public class HomeScreenActivity extends AppCompatActivity
     FloatingActionButton fab;
     @BindView(R.id.nav_view)
     NavigationView navigationView;
+    @BindView(R.id.progress)
+    View progress;
+    @BindView(R.id.rvBeerRecepies)
+    RecyclerView rvBeerRecepies;
+
+    private HomeScreenPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +64,9 @@ public class HomeScreenActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        HomeScreenPresenter presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
+        presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
         presenter.getBeers();
+        progress.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -142,12 +156,43 @@ public class HomeScreenActivity extends AppCompatActivity
     }
 
     @Override
-    public void setBeerList(List<BeerDetails> beerList) {
-
+    public void setBeerList(@NonNull final List<BeerDetails> beerList) {
+        if (beerList.size() > 0) {
+            if (rvBeerRecepies.getAdapter() == null) {
+                rvBeerRecepies.setLayoutManager(new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL));
+                rvBeerRecepies.addItemDecoration(new GridSpacesItemDecoration(2, getResources().getDimensionPixelSize(R.dimen.content_padding), true));
+                rvBeerRecepies.setAdapter(new BeerListRecyclerAdapter(beerList));
+            } else {
+                final BeerListRecyclerAdapter adapter = (BeerListRecyclerAdapter) rvBeerRecepies.getAdapter();
+                adapter.updateList(beerList);
+            }
+        }
     }
 
     @Override
     public void noBeerFound() {
 
+    }
+
+    @Override
+    public void showToast(@NonNull final String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onStop() {
+        presenter.destroy();
+        super.onStop();
+    }
+
+    @Override
+    public void showProgress(boolean showProgress) {
+        progress.setVisibility(showProgress ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public Observable<?> showError(@Nullable int errorMessage, final Observable throwable) {
+        showToast(getString(errorMessage));
+        return Observable.just(null);
     }
 }

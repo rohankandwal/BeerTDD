@@ -5,9 +5,10 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0-alpha14'
+        classpath 'com.android.tools.build:gradle:3.2.0-alpha15'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -36,4 +37,9 @@ ext {
     timberVersion = "4.7.0"
     retrofitVersion = "2.4.0"
     mockitoVersion = "2.18.3"
+    okHttp3Version = "3.8.0"
+    rxJavaVersion = "2.1.10"
+    rxAndroidVersion = "2.0.1"
+    lottieVersion = "2.5.4"
+    glideVersion = "4.7.1"
 }

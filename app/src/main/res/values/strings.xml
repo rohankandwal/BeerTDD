@@ -7,4 +7,10 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="search">Search</string>
+    <string name="beer_animation">beer_animation.json</string>
+    <string name="error_internet">Unable to connect to internet</string>
+    <string name="beer_image">Beer Image</string>
+    <string name="abv_heading">ABV :</string>
+    <string name="ibu_heading">IBU :</string>
+    <string name="not_application">NA</string>
 </resources>
