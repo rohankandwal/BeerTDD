@@ -10,7 +10,7 @@ public class BeerRecepieApplication extends Application {
     public void onCreate() {
         super.onCreate();
         if (BuildConfig.DEBUG) {
-            Timber.plant();
+            Timber.plant(new Timber.DebugTree());
         }
     }
 }

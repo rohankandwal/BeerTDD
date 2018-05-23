@@ -1,6 +1,7 @@
 package com.itcse.beerrecepies.view.home;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +25,7 @@ import com.itcse.beerrecepies.model.repository.ApiClient;
 import com.itcse.beerrecepies.utils.EndlessScrollListener;
 import com.itcse.beerrecepies.utils.GridSpacesItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,8 +51,15 @@ public class HomeScreenActivity extends AppCompatActivity
     View progress;
     @BindView(R.id.rvBeerRecepies)
     RecyclerView rvBeerRecepies;
+    @BindView(R.id.tvEmptyList)
+    View tvEmptyList;
 
     private HomeScreenPresenter presenter;
+
+    private Handler searchHandler = new Handler();
+    private Runnable searchRunnable;
+    private String searchString;
+    private EndlessScrollListener endlessScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +77,16 @@ public class HomeScreenActivity extends AppCompatActivity
 
         presenter = new HomeScreenPresenter(this, ApiClient.getAPI());
         presenter.getBeers(1);
+
+        searchRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!TextUtils.isEmpty(searchString)) {
+                    searchBeerByName(searchString);
+                }
+            }
+        };
+
     }
 
     @Override
@@ -82,25 +102,49 @@ public class HomeScreenActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.home_screen, menu);
-        final MenuItem myActionMenuItem = menu.findItem( R.id.action_search);
+        final MenuItem myActionMenuItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) myActionMenuItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if( ! searchView.isIconified()) {
+                if (!searchView.isIconified()) {
                     searchView.setIconified(true);
                 }
                 myActionMenuItem.collapseActionView();
-                Timber.d(query);
+                searchBeerByName(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+                searchString = newText;
+                searchHandler.removeCallbacks(searchRunnable);
+                searchHandler.postDelayed(searchRunnable, 500);
+                return true;
+            }
+        });
+        myActionMenuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                // Clearing the existing beer list
+                loadNewBeerData(new ArrayList<BeerDetails>());
+                // loading new data
+                presenter.getBeers(1);
+                searchString = null;
+                return true;
             }
         });
         return true;
+    }
+
+    private void searchBeerByName(@NonNull final String query) {
+        Timber.d(query);
+        presenter.searchBeerByName(query);
     }
 
     @Override
@@ -160,25 +204,27 @@ public class HomeScreenActivity extends AppCompatActivity
         if (beerList.size() > 0) {
             if (rvBeerRecepies.getAdapter() == null) {
                 final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL);
-                rvBeerRecepies.setLayoutManager(layoutManager);
-                rvBeerRecepies.addItemDecoration(new GridSpacesItemDecoration(2, getResources().getDimensionPixelSize(R.dimen.content_padding), true));
-                rvBeerRecepies.setAdapter(new BeerListRecyclerAdapter(beerList));
-                rvBeerRecepies.addOnScrollListener(new EndlessScrollListener(layoutManager) {
+                endlessScrollListener = new EndlessScrollListener(layoutManager) {
                     @Override
                     public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                         presenter.getBeers(page);
                     }
-                });
+                };
+                rvBeerRecepies.setLayoutManager(layoutManager);
+                rvBeerRecepies.addItemDecoration(new GridSpacesItemDecoration(2, getResources().getDimensionPixelSize(R.dimen.content_padding), true));
+                rvBeerRecepies.setAdapter(new BeerListRecyclerAdapter(beerList));
+                rvBeerRecepies.addOnScrollListener(endlessScrollListener);
             } else {
                 final BeerListRecyclerAdapter adapter = (BeerListRecyclerAdapter) rvBeerRecepies.getAdapter();
                 adapter.addMore(beerList);
             }
+            tvEmptyList.setVisibility(View.GONE);
         }
     }
 
     @Override
     public void noBeerFound() {
-
+        tvEmptyList.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -188,12 +234,28 @@ public class HomeScreenActivity extends AppCompatActivity
 
     @Override
     public void noBeerWithNameFound(String beerName) {
-
+        loadNewBeerData(new ArrayList<BeerDetails>());
+        tvEmptyList.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void searchedBeerListFound(List<BeerDetails> beerDetails) {
+    public void searchedBeerListFound(@NonNull final List<BeerDetails> beerDetails) {
+        loadNewBeerData(beerDetails);
+        tvEmptyList.setVisibility(View.GONE);
+    }
 
+    /**
+     * Function to clear the existing beer list and load new beer list data
+     *
+     * @param beerDetails List containing new Beer list
+     */
+    private void loadNewBeerData(@NonNull List<BeerDetails> beerDetails) {
+        if (rvBeerRecepies.getAdapter() != null) {
+            ((BeerListRecyclerAdapter) rvBeerRecepies.getAdapter()).refreshData(beerDetails);
+            if (endlessScrollListener != null) {
+                endlessScrollListener.resetState();
+            }
+        }
     }
 
     @Override

@@ -21,4 +21,16 @@
 
     <include layout="@layout/progress_dialog" />
 
+    <TextView
+        android:id="@+id/tvEmptyList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="@dimen/text_14sp"
+        android:visibility="gone"
+        android:text="@string/no_beer_found"/>
+
 </android.support.constraint.ConstraintLayout>

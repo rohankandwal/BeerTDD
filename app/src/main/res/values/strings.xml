@@ -13,4 +13,5 @@
     <string name="abv_heading">ABV :</string>
     <string name="ibu_heading">IBU :</string>
     <string name="not_application">NA</string>
+    <string name="no_beer_found">No beer found</string>
 </resources>
